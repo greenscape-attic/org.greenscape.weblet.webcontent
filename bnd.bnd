@@ -1,0 +1,7 @@
+-buildpath: osgi.core;version=4.3,\
+	osgi.cmpn;version=4.3,\
+	junit.osgi
+Bundle-Version: 0.1.0
+-dsannotations: *
+Include-Resource: META-INF=resource
+GS-Weblet: META-INF/weblet.json
