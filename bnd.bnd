@@ -1,7 +1,20 @@
--buildpath: osgi.core;version=4.3,\
+-buildpath:  \
+	osgi.core;version=4.3,\
 	osgi.cmpn;version=4.3,\
-	junit.osgi
+	junit.osgi,\
+	org.greenscape.persistence;version=latest,\
+	org.greenscape.core;version=latest,\
+	org.greenscape.web.rest;version=latest,\
+	org.amdatu.web.rest.jaxrs,\
+	org.eclipse.osgi.services,\
+	org.greenscape.weblet.journal;version=latest
 Bundle-Version: 0.1.0
--dsannotations: *
-Include-Resource: META-INF=resource
-GS-Weblet: META-INF/weblet.json
+Export-Package:  \
+	org.greenscape.weblet.webcontent,\
+	org.greenscape.weblet.webcontent.service,\
+	org.greenscape.weblet.webcontent.rest
+Private-Package:  \
+	org.greenscape.weblet.webcontent.service.impl
+GS-Model: org.greenscape.weblet.webcontent.WebContentDisplay
+-dsannotations:  \
+	*
