@@ -20,9 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.greenscape.persistence.DocumentModel;
-import org.greenscape.persistence.ModelRegistryEntry;
-import org.greenscape.persistence.annotations.Model;
+import org.greenscape.core.service.Service;
 import org.greenscape.web.rest.RestService;
 import org.greenscape.weblet.journal.model.JournalArticle;
 import org.greenscape.weblet.webcontent.WebContentDisplay;
@@ -40,18 +38,19 @@ import org.osgi.service.log.LogService;
 @Component(name = WebContentDisplayResource.FACTORY_DS, property = { Constants.SERVICE_RANKING + "=2000" })
 public class WebContentDisplayResource implements RestService {
 	static final String FACTORY_DS = "org.greenscape.site.rest.WebContentDisplayResource";
+	private static final String MODEL_WEBCONTENTDISPLAY = "webcontentdisplay";
+	private static final String MODEL_JOURNALARTICLE = "JournalArticle";
 	private static final String PATH_DEF_DISPLAY_ID = "{displayId}";
 
 	private WebContentDisplayService webcontentService;
-	private ModelRegistryEntry modelRegistryEntry;
-	private Class<? extends DocumentModel> clazz;
+	private Service service;
 
 	private BundleContext context;
 	private LogService logService;
 
 	@Override
 	public String getResourceName() {
-		return clazz.getAnnotation(Model.class).name();
+		return MODEL_WEBCONTENTDISPLAY;
 	}
 
 	@GET
@@ -60,16 +59,16 @@ public class WebContentDisplayResource implements RestService {
 		List<WebContentDisplayParam> list = new ArrayList<>();
 		List<WebContentDisplay> displayList = null;
 		if (uriInfo.getQueryParameters() == null || uriInfo.getQueryParameters().size() == 0) {
-			displayList = webcontentService.find(clazz);
+			displayList = webcontentService.find();
 		} else {
-			displayList = webcontentService.find(clazz, uriInfo.getQueryParameters());
+			displayList = webcontentService.find(uriInfo.getQueryParameters());
 		}
 
 		for (WebContentDisplay display : displayList) {
 			WebContentDisplayParam param = new WebContentDisplayParam();
 			param.setDisplayId(display.getModelId());
 			param.setPageletId(display.getPageletId());
-			JournalArticle article = webcontentService.find(JournalArticle.class, display.getJournalArticleId());
+			JournalArticle article = service.find(MODEL_JOURNALARTICLE, display.getJournalArticleId());
 			param.setArticleId(article.getModelId());
 			param.setContent(article.getContent());
 			param.setTitle(article.getTitle());
@@ -85,8 +84,8 @@ public class WebContentDisplayResource implements RestService {
 	public WebContentDisplayParam getWebContent(@PathParam("displayId") String displayId) {
 		WebContentDisplayParam entity = null;
 		try {
-			WebContentDisplay display = webcontentService.find(clazz, displayId);
-			JournalArticle article = webcontentService.find(JournalArticle.class, display.getJournalArticleId());
+			WebContentDisplay display = webcontentService.find(displayId);
+			JournalArticle article = service.find(MODEL_JOURNALARTICLE, display.getJournalArticleId());
 			entity = new WebContentDisplayParam();
 			entity.setArticleId(article.getModelId());
 			entity.setContent(article.getContent());
@@ -104,32 +103,28 @@ public class WebContentDisplayResource implements RestService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String addWebContent(WebContentDisplayParam param) {
 		WebContentDisplay entity;
-		try {
-			JournalArticle article = new JournalArticle();
-			article.setContent(param.getContent());
-			article.setSiteId(param.getSiteId());
-			article.setTitle(param.getTitle());
-			webcontentService.save(article);
-			entity = (WebContentDisplay) clazz.newInstance();
-			entity.setJournalArticleId(article.getModelId());
-			entity.setPageletId(param.getPageletId());
-			entity = webcontentService.save(entity);
-			return entity.getModelId();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new WebApplicationException(Response.status(Status.NOT_ACCEPTABLE).entity(e.getMessage()).build());
-		}
+		JournalArticle article = new JournalArticle();
+		article.setContent(param.getContent());
+		article.setSiteId(param.getSiteId());
+		article.setTitle(param.getTitle());
+		service.save(MODEL_JOURNALARTICLE, article);
+		entity = new WebContentDisplay();
+		entity.setJournalArticleId(article.getModelId());
+		entity.setPageletId(param.getPageletId());
+		entity = webcontentService.save(entity);
+		return entity.getModelId();
 	}
 
 	@PUT
 	@Path(PATH_DEF_DISPLAY_ID)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String updateWebContent(@PathParam("displayId") String displayId, WebContentDisplayParam param) {
-		WebContentDisplay entity = webcontentService.find(clazz, displayId);
+		WebContentDisplay entity = webcontentService.find(displayId);
 		if (entity == null) {
 			throw new WebApplicationException(Response.status(Status.NOT_FOUND)
 					.entity("No model with id " + displayId + " exists").build());
 		}
-		JournalArticle article = webcontentService.find(JournalArticle.class, param.getArticleId());
+		JournalArticle article = service.find(MODEL_JOURNALARTICLE, param.getArticleId());
 		if (article == null) {
 			throw new WebApplicationException(Response.status(Status.NOT_FOUND)
 					.entity("No article with id " + param.getArticleId() + " exists").build());
@@ -137,13 +132,13 @@ public class WebContentDisplayResource implements RestService {
 		article.setTitle(param.getTitle());
 		article.setContent(param.getContent());
 		article.setModifiedDate(new Date());
-		webcontentService.update(article);
+		service.update(MODEL_JOURNALARTICLE, article);
 		return "OK";
 	}
 
 	@DELETE
 	public void deleteModel() {
-		webcontentService.delete(clazz);
+		webcontentService.delete();
 	}
 
 	@DELETE
@@ -154,17 +149,6 @@ public class WebContentDisplayResource implements RestService {
 	@Activate
 	public void activate(ComponentContext ctx, Map<String, Object> config) {
 		context = ctx.getBundleContext();
-		init(context);
-	}
-
-	@Reference(target = "(modelClass=org.greenscape.weblet.webcontent.WebContentDisplay)", policy = ReferencePolicy.DYNAMIC)
-	public void setModelRegistryEntry(ModelRegistryEntry modelRegistryEntry) {
-		this.modelRegistryEntry = modelRegistryEntry;
-		init(context);
-	}
-
-	public void unsetModelRegistryEntry(ModelRegistryEntry modelRegistryEntry) {
-		this.modelRegistryEntry = null;
 	}
 
 	@Reference(policy = ReferencePolicy.DYNAMIC)
@@ -174,6 +158,15 @@ public class WebContentDisplayResource implements RestService {
 
 	public void unsetSiteService(WebContentDisplayService siteService) {
 		this.webcontentService = null;
+	}
+
+	@Reference(policy = ReferencePolicy.DYNAMIC)
+	public void setService(Service service) {
+		this.service = service;
+	}
+
+	public void unsetService(Service service) {
+		this.service = null;
 	}
 
 	@Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -187,20 +180,7 @@ public class WebContentDisplayResource implements RestService {
 
 	@Override
 	public String toString() {
-		return clazz.getName();
-	}
-
-	@SuppressWarnings("unchecked")
-	private void init(BundleContext ctx) {
-		if (ctx == null) {
-			return;
-		}
-		try {
-			clazz = (Class<? extends DocumentModel>) ctx.getBundle(modelRegistryEntry.getBundleId()).loadClass(
-					modelRegistryEntry.getModelClass());
-		} catch (Exception e) {
-			logService.log(LogService.LOG_ERROR, e.getMessage(), e);
-		}
+		return getResourceName();
 	}
 
 }

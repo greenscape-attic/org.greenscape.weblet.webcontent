@@ -1,0 +1,48 @@
+{
+	"resources":[
+		{
+			"modelResource":{
+				"name":"WebContentDisplay",
+				"modelClass":"org.greenscape.weblet.webcontent.WebContentDisplay",
+				"inherits":[
+					"MultiTenantModel"
+				],
+				"properties":[
+					{
+						"name":"pageletId",
+						"type":"java.lang.String"
+					},
+					{
+						"name":"journalArticleId",
+						"type":"java.lang.String"
+					}
+					
+				],
+				"permissions":{
+					"supports":[
+						"VIEW",
+						"ADD",
+						"UPDATE",
+						"DELETE",
+						"PERMISSIONS"
+					],
+					"siteMemberDefaults":[
+						"VIEW"
+					],
+					"guestUnsupported":[
+						"ADD",
+						"UPDATE",
+						"DELETE",
+						"PERMISSIONS"
+					]
+					
+				},
+				"remote":true,
+				"remoteName":"webcontentdisplay"
+			}
+			
+		}
+		
+	]
+	
+}

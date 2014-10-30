@@ -1,9 +1,7 @@
 package org.greenscape.weblet.webcontent;
 
 import org.greenscape.persistence.PersistedModelBase;
-import org.greenscape.persistence.annotations.Model;
 
-@Model(name = WebContentDisplayModel.MODEL_NAME)
 public class WebContentDisplay extends PersistedModelBase implements WebContentDisplayModel {
 	private static final long serialVersionUID = -2659054351083446899L;
 

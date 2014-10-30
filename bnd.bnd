@@ -2,12 +2,12 @@
 	osgi.core;version=4.3,\
 	osgi.cmpn;version=4.3,\
 	junit.osgi,\
-	org.greenscape.persistence;version=latest,\
 	org.greenscape.core;version=latest,\
 	org.greenscape.web.rest;version=latest,\
 	org.amdatu.web.rest.jaxrs,\
 	org.eclipse.osgi.services,\
-	org.greenscape.weblet.journal;version=latest
+	org.greenscape.weblet.journal;version=latest,\
+	org.greenscape.persistence;version=latest
 Bundle-Version: 0.1.0
 Export-Package:  \
 	org.greenscape.weblet.webcontent,\
@@ -15,6 +15,7 @@ Export-Package:  \
 	org.greenscape.weblet.webcontent.rest
 Private-Package:  \
 	org.greenscape.weblet.webcontent.service.impl
-GS-Model: org.greenscape.weblet.webcontent.WebContentDisplay
+Include-Resource: META-INF=resource
+GS-Resource: META-INF/resources.json
 -dsannotations:  \
 	*
