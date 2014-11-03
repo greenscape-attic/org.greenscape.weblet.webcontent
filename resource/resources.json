@@ -20,11 +20,26 @@
 				],
 				"permissions":{
 					"supports":[
-						"VIEW",
-						"ADD",
-						"UPDATE",
-						"DELETE",
-						"PERMISSIONS"
+						{
+							"action":"VIEW",
+							"bit":1
+						},
+						{
+							"action":"ADD",
+							"bit":2
+						},
+						{
+							"action":"UPDATE",
+							"bit":4
+						},
+						{
+							"action":"DELETE",
+							"bit":8
+						},
+						{
+							"action":"PERMISSIONS",
+							"bit":16
+						}
 					],
 					"siteMemberDefaults":[
 						"VIEW"
