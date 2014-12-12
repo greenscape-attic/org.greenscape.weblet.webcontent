@@ -22,7 +22,7 @@ public class WebContentDisplayServiceImpl implements WebContentDisplayService {
 
 	@Override
 	public WebContentDisplay find(String id) {
-		return service.find(MODEL_WEBCONTENTDISPLAY, id);
+		return service.findByModelId(MODEL_WEBCONTENTDISPLAY, id);
 	}
 
 	@Override

@@ -68,7 +68,7 @@ public class WebContentDisplayResource implements RestService {
 			WebContentDisplayParam param = new WebContentDisplayParam();
 			param.setDisplayId(display.getModelId());
 			param.setPageletId(display.getPageletId());
-			JournalArticle article = service.find(MODEL_JOURNALARTICLE, display.getJournalArticleId());
+			JournalArticle article = service.findByModelId(MODEL_JOURNALARTICLE, display.getJournalArticleId());
 			param.setArticleId(article.getModelId());
 			param.setContent(article.getContent());
 			param.setTitle(article.getTitle());
@@ -85,7 +85,7 @@ public class WebContentDisplayResource implements RestService {
 		WebContentDisplayParam entity = null;
 		try {
 			WebContentDisplay display = webcontentService.find(displayId);
-			JournalArticle article = service.find(MODEL_JOURNALARTICLE, display.getJournalArticleId());
+			JournalArticle article = service.findByModelId(MODEL_JOURNALARTICLE, display.getJournalArticleId());
 			entity = new WebContentDisplayParam();
 			entity.setArticleId(article.getModelId());
 			entity.setContent(article.getContent());
@@ -124,7 +124,7 @@ public class WebContentDisplayResource implements RestService {
 			throw new WebApplicationException(Response.status(Status.NOT_FOUND)
 					.entity("No model with id " + displayId + " exists").build());
 		}
-		JournalArticle article = service.find(MODEL_JOURNALARTICLE, param.getArticleId());
+		JournalArticle article = service.findByModelId(MODEL_JOURNALARTICLE, param.getArticleId());
 		if (article == null) {
 			throw new WebApplicationException(Response.status(Status.NOT_FOUND)
 					.entity("No article with id " + param.getArticleId() + " exists").build());
